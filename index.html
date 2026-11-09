@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Preencha os dados do contrato I&S Personalizados, escolha a forma de pagamento e visualize o PDF atualizado."
+    >
+    <meta name="theme-color" content="#0b0a08">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'"
+    >
+    <title>Gerador de contratos | I&amp;S Personalizados</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./assets/pdf-lib.min.js"></script>
+    <script src="./assets/pdf.min.js"></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="I&S Personalizados, início">
+        <span class="brand-mark" aria-hidden="true">I<span>&amp;</span>S</span>
+        <span class="brand-copy">
+          <strong>I&amp;S</strong>
+          <small>EVENTOS E PERSONALIZADOS</small>
+        </span>
+      </a>
+      <span class="privacy-note">
+        <span class="privacy-dot" aria-hidden="true"></span>
+        Seus dados ficam neste dispositivo
+      </span>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">CONTRATO DE PRESTAÇÃO DE SERVIÇO</p>
+        <h1 id="page-title">Preencha o molde do contrato</h1>
+        <p class="intro-copy">
+          Informe os dados uma única vez. A prévia abaixo acompanha as alterações e o PDF pode ser baixado pronto para assinatura.
+        </p>
+      </section>
+
+      <section class="form-card" aria-labelledby="form-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DADOS DO EVENTO</p>
+            <h2 id="form-title">Informações do contratante</h2>
+          </div>
+          <span class="step-badge">01</span>
+        </div>
+
+        <form id="contractForm" novalidate>
+          <div class="form-grid">
+            <label class="field field-wide">
+              <span>Contratante</span>
+              <input
+                id="contractor"
+                name="contractor"
+                type="text"
+                maxlength="80"
+                autocomplete="name"
+                placeholder="Nome completo"
+                required
+              >
+            </label>
+
+            <label class="field">
+              <span>CPF</span>
+              <input
+                id="cpf"
+                name="cpf"
+                type="text"
+                inputmode="numeric"
+                maxlength="14"
+                autocomplete="off"
+                placeholder="000.000.000-00"
+                required
+              >
+            </label>
+
+            <label class="field field-wide">
+              <span>Serviços</span>
+              <textarea
+                id="services"
+                name="services"
+                rows="3"
+                maxlength="300"
+                placeholder="Um serviço por linha (até 3 linhas)"
+                required
+              ></textarea>
+              <small>Digite até três itens, um por linha, conforme o contrato original.</small>
+            </label>
+
+            <label class="field field-wide">
+              <span>Endereço</span>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                maxlength="120"
+                autocomplete="street-address"
+                placeholder="Rua, número, bairro e cidade"
+                required
+              >
+            </label>
+
+            <label class="field">
+              <span>Valor</span>
+              <div class="input-prefix">
+                <span aria-hidden="true">R$</span>
+                <input
+                  id="total"
+                  name="total"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="1.100,00"
+                  required
+                >
+              </div>
+              <small id="amountHelp">Informe o valor total do contrato.</small>
+            </label>
+
+            <label class="field">
+              <span>Data do evento</span>
+              <input id="eventDate" name="eventDate" type="date" required>
+              <small>Necessária para atualizar a data no contrato.</small>
+            </label>
+
+            <label class="field field-wide">
+              <span>Forma de pagamento</span>
+              <select id="paymentMethod" name="paymentMethod">
+                <option value="installments">Parcelamento</option>
+                <option value="cash">Pagamento à vista</option>
+                <option value="reservation">50% para reserva e 50% antes do evento</option>
+              </select>
+            </label>
+
+            <label id="installmentField" class="field field-wide">
+              <span>Parcelas (se houver)</span>
+              <input
+                id="installmentCount"
+                name="installmentCount"
+                type="number"
+                inputmode="numeric"
+                min="2"
+                max="120"
+                step="1"
+                value="2"
+              >
+              <small>De 2 a 120 parcelas. O valor de cada parcela é calculado automaticamente; diferenças de centavos são ajustadas nas primeiras.</small>
+            </label>
+          </div>
+
+          <div id="formError" class="form-error" role="alert" hidden></div>
+
+          <div class="payment-summary" aria-live="polite">
+            <div class="summary-label">
+              <span class="summary-icon" aria-hidden="true">R$</span>
+              <div>
+                <strong id="summaryTitle">Resumo do pagamento</strong>
+                <span id="summaryHint">Os cálculos aparecem aqui conforme você preenche.</span>
+              </div>
+            </div>
+            <ul id="paymentBreakdown" class="breakdown"></ul>
+            <p id="paymentClause" class="payment-clause"></p>
+          </div>
+
+          <div class="form-actions">
+            <span id="previewStatus" class="status-text" role="status">Carregando o modelo do contrato…</span>
+            <button id="downloadButton" class="button button-primary" type="button" disabled>
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2.5v9m0 0 3.5-3.5M10 11.5 6.5 8M3.5 13.5v3h13v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Baixar contrato em PDF
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="preview-section" aria-labelledby="preview-title">
+        <div class="section-heading preview-heading">
+          <div>
+            <p class="eyebrow">DOCUMENTO ATUALIZADO</p>
+            <h2 id="preview-title">Prévia do contrato</h2>
+          </div>
+          <span class="preview-live"><span aria-hidden="true"></span> Atualização automática</span>
+        </div>
+        <div class="pdf-frame">
+          <canvas id="pdfPreview" aria-label="Prévia do contrato PDF atualizado"></canvas>
+          <div id="previewOverlay" class="preview-overlay">
+            <span class="loader" aria-hidden="true"></span>
+            <span>Preparando a prévia do contrato…</span>
+          </div>
+        </div>
+        <p class="preview-note">
+          Confira os dados e a forma de pagamento antes de baixar. Nenhuma informação é enviada ou salva pelo site.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>I&amp;S Personalizados</span>
+      <span>Eventos especiais, contratos sem complicação.</span>
+    </footer>
+  </body>
+</html>
