@@ -405,13 +405,13 @@
       ? data.cpfDigits.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4")
       : "";
     drawTextAtTop(page, formattedCpf, 350, 210.8, bold, 9.5, GOLD, 195);
-    drawTextAtTop(page, formatDate(data.eventDate), 440, 237.8, bold, 9, GOLD, 110);
+    drawTextAtTop(page, formatDate(data.eventDate), 446, 237.8, bold, 9, GOLD, 110);
 
     const serviceBaselines = [286.3, 299.8, 313.3];
     data.services.slice(0, serviceBaselines.length).forEach((service, index) => {
       drawTextAtTop(page, service, 32.7, serviceBaselines[index], regular, 9.5, WHITE, 525);
     });
-    drawTextAtTop(page, data.address, 88, 370.4, regular, 10, WHITE, 470);
+    drawTextAtTop(page, data.address, 94, 370.4, regular, 10, WHITE, 470);
     drawPaymentClause(page, makePaymentText(data), regular);
 
     const signatureName = data.contractor;
