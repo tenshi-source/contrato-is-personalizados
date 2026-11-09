@@ -22,7 +22,6 @@
   const paymentBreakdown = document.querySelector("#paymentBreakdown");
   const paymentClause = document.querySelector("#paymentClause");
 
-  const PAGE_HEIGHT = 842.25;
   const MAX_INSTALLMENTS = 120;
   let PDFDocument;
   let StandardFonts;
@@ -362,6 +361,7 @@
   function drawTextAtTop(page, text, x, baselineFromTop, font, size, color, maxWidth) {
     if (!text) return;
     let fontSize = size;
+    const cropBox = page.getCropBox();
     if (maxWidth) {
       while (fontSize > 7 && font.widthOfTextAtSize(text, fontSize) > maxWidth) {
         fontSize -= 0.25;
@@ -372,7 +372,7 @@
     }
     page.drawText(text, {
       x,
-      y: PAGE_HEIGHT - baselineFromTop,
+      y: cropBox.y + cropBox.height - baselineFromTop,
       font,
       size: fontSize,
       color,
